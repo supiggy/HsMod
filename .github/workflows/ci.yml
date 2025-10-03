@@ -1,31 +1,40 @@
 name: Auto Build Test
 
+# 触发条件：手动触发 + 推送到 bepinex5 分支时自动触发
 on:
+  workflow_dispatch:  # 允许手动在 GitHub Actions 页面触发
   push:
-    branches: [ "bepinex5" ]
-  pull_request:
-  merge_group:
+    branches: [ bepinex5 ]
 
 jobs:
   build:
-    runs-on: windows-latest
-
+    runs-on: ubuntu-latest  # 运行环境（也可选择 windows-latest，根据项目需求）
     steps:
-    # Checkout the repository
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    
-    # Setup .NET SDK
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.x
-    
-    # Restore dependencies
-    - name: Restore dependencies
-      run: dotnet restore --locked-mode
-    
-    # Build the project
-    - name: Build HsMod
-      run: dotnet build --configuration Release --no-restore
+      # 1. 安装 .NET SDK（版本 8.x）
+      - name: 设置 .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      # 2. 克隆仓库（仅拉取 bepinex5 分支的最新提交）
+      - name: 克隆代码仓库
+        run: |
+          git clone --depth 1 --branch bepinex5 https://github.com/Pik-4/HsMod
+          cd HsMod
+
+      # 3. 还原项目依赖（可选：如果需要确保依赖最新，取消注释下方命令）
+      # - name: 还原依赖
+      #   run: dotnet restore HsMod
+      #   working-directory: HsMod
+
+      # 4. 构建 Release 版本
+      - name: 构建 Release
+        run: dotnet build HsMod --configuration Release --no-restore
+        working-directory: HsMod  # 指定命令在 HsMod 目录执行
+
+      # 5. 上传构建产物（方便下载）
+      - name: 上传构建结果
+        uses: actions/upload-artifact@v4
+        with:
+          name: HsMod-Release
+          path: HsMod/bin/Release/net8.0/HsMod.dll  # 需根据项目实际输出路径调整
