@@ -37,4 +37,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: HsMod-Release
-          path: HsMod/bin/Release/net8.0/HsMod.dll  # 需根据项目实际输出路径调整
+          path: HsMod/HsMod/Release/HsMod.dll  # 需根据项目实际输出路径调整
